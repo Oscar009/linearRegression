@@ -11,7 +11,7 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 ChartJS.register(
   CategoryScale,
@@ -30,9 +30,13 @@ const row = {
 };
 
 function App() {
-  const scores = [6, 5, 5, 5, 8, 9, 10, 5, 12, 6];
-  const scores2 = [1, 3, 2, 2, 4, 4, 5, 3, 2];
-  const labels = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+  const [dataSet, setDataSet] = useState(
+    "{23,651},{26,762},{30,856},{34,1063},{43,1190},{48, 1298},{52, 1421},{57,1440},{58,1518}"
+  );
+
+  const [endogena, setEndogena] = useState([]);
+  const [results, setResults] = useState([]);
+  const [labels, setLabels] = useState([]);
 
   const options = {
     responsive: true,
@@ -48,30 +52,63 @@ function App() {
     },
   };
 
-  const data = useMemo(function () {
+  const data = useMemo(() => {
     return {
       datasets: [
         {
-          label: "Mis datos",
-          data: scores,
-          //tension: 0.3,
-          borderColor: "rgb(75, 192, 192)",
-          pointRadius: 6,
-          pointBackgroundColor: "rgb(75, 192, 192)",
-          backgroundColor: "rgba(75, 192, 192, 0.3)",
+          label: "points",
+          data: endogena,
+          tension: 0.3,
+          pointRadius: 4,
+          backgroundColor: "blue",
         },
         {
-          label: "Mis datos (2)",
-          //tension: 0.3,
-          data: scores2,
-          borderColor: "green",
-          backgroundColor: "rgba(0, 255, 0, 0.3)",
-          pointRadius: 6,
+          label: "y hat",
+          tension: 0.3,
+          data: results,
+          borderColor: "red",
+          backgroundColor: "red",
+          pointRadius: 4,
         },
       ],
       labels,
     };
-  }, []);
+  }, [labels, endogena, results]);
+
+  const calculate = () => {
+    let myData = dataSet.replace(/\s+/g, "");
+    let aux = "";
+    let myLabels = [];
+    let myEndogena = [];
+    let flag = true;
+    for (let i = 0; i < myData.length; i++) {
+      if (myData.charAt(i) === "{") {
+        aux = "";
+      } else if (myData.charAt(i) === "}") {
+        myEndogena.push(parseInt(aux));
+        aux = "";
+      } else if (myData.charAt(i) === ",") {
+        if (flag) {
+          myLabels.push(parseInt(aux));
+          aux = "";
+          flag = false;
+        } else {
+          flag = true;
+        }
+      } else {
+        aux += myData.charAt(i);
+      }
+    }
+    setLabels(myLabels);
+    setEndogena(myEndogena);
+    console.log(labels);
+    console.log(endogena);
+  };
+
+  const handleUpdate = (e) => {
+    const { value } = e.target;
+    setDataSet(value);
+  };
 
   return (
     <div>
@@ -80,17 +117,23 @@ function App() {
       <hr></hr>
       <div style={row}>
         <h2>DataSet:</h2>
-        <input type="text" />
-        <button>Send</button>
+        <input
+          style={{ width: "50%" }}
+          onChange={handleUpdate}
+          type="text"
+          name="dataSet"
+          value={dataSet}
+        />
+        <button onClick={calculate}>Send</button>
       </div>
+      {dataSet}
       <div>
         <h2>Output:</h2>
-        <div style={{ width: "50%", height: "30%" }}>
+        <div style={{ width: "60%", height: "50%" }}>
           <Line data={data} options={options} />
         </div>
       </div>
     </div>
   );
 }
-
 export default App;
