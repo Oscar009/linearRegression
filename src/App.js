@@ -64,7 +64,6 @@ function App() {
         },
         {
           label: "y hat",
-          tension: 0.3,
           data: results,
           borderColor: "red",
           backgroundColor: "red",
@@ -99,10 +98,44 @@ function App() {
         aux += myData.charAt(i);
       }
     }
-    setLabels(myLabels);
+    //x*y coleccion
+    let xpory = [];
+    //x^2 calección
+    let xcuadrada = [];
+    //sumatoria de y
+    let sumy = 0;
+    //sumatoria de x
+    let sumx = 0;
+    for (let i = 0; i < endogena.length; i++) {
+      xpory.push(endogena[i] * labels[i]);
+      xcuadrada.push(labels[i] * labels[i]);
+      sumy += endogena[i];
+      sumx += labels[i];
+    }
+    //sumatoria de x*y
+    let sumxpory = 0;
+    //sumatoria de x^2
+    let sumxcuadrada = 0;
+    for (let i = 0; i < xpory.length; i++) {
+      sumxpory += xpory[i];
+      sumxcuadrada += xcuadrada[i];
+    }
+    //calcular b1
+    let b1 =
+      (endogena.length * sumxpory - sumx * sumy) /
+      (endogena.length * sumxcuadrada - sumx * sumx);
+    //calcular b0
+    let b0 = (sumy - b1 * sumx) / endogena.length;
+    console.log(b0);
+    //calcular puntos de y hat
+    let myResults = [];
+    for (let i = 0; i < labels.length; i++) {
+      myResults.push(b0 + b1 * labels[i]);
+    }
+
+    setResults(myResults);
     setEndogena(myEndogena);
-    console.log(labels);
-    console.log(endogena);
+    setLabels(myLabels);
   };
 
   const handleUpdate = (e) => {
