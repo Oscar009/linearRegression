@@ -12,6 +12,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useMemo, useState } from "react";
+import axios from "axios";
 
 ChartJS.register(
   CategoryScale,
@@ -37,6 +38,10 @@ function App() {
   const [endogena, setEndogena] = useState([]);
   const [results, setResults] = useState([]);
   const [labels, setLabels] = useState([]);
+  const [b0, setB0] = useState(0);
+  const [b1, setB1] = useState(0);
+  const [point, setPoint] = useState(0);
+  const [x, setX] = useState(0);
 
   const options = {
     responsive: true,
@@ -124,9 +129,10 @@ function App() {
     let b1 =
       (endogena.length * sumxpory - sumx * sumy) /
       (endogena.length * sumxcuadrada - sumx * sumx);
+    setB1(b1);
     //calcular b0
     let b0 = (sumy - b1 * sumx) / endogena.length;
-    console.log(b0);
+    setB0(b0);
     //calcular puntos de y hat
     let myResults = [];
     for (let i = 0; i < labels.length; i++) {
@@ -136,6 +142,15 @@ function App() {
     setResults(myResults);
     setEndogena(myEndogena);
     setLabels(myLabels);
+  };
+
+  const prediction = () => {
+    setPoint(b0 + b1 * x);
+  };
+
+  const handleUpdatex = (e) => {
+    const { value } = e.target;
+    setX(value);
   };
 
   const handleUpdate = (e) => {
@@ -165,6 +180,15 @@ function App() {
         <div style={{ width: "60%", height: "50%" }}>
           <Line data={data} options={options} />
         </div>
+        <h2>
+          y = {b0} + {b1} * x
+        </h2>
+        <br></br>
+        Prediction:
+        <input onChange={handleUpdatex} type="number" name="x" value={x} />
+        <button onClick={prediction}>Calculate</button>
+        <br></br>
+        Result: {point}
       </div>
     </div>
   );
